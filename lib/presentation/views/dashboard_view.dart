@@ -43,7 +43,6 @@ class DashboardView extends GetView<DashboardController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greeting
             Obx(() => Text(
               'Good Morning, ${controller.user.value?.name ?? 'User'}',
               style: const TextStyle(
@@ -57,16 +56,10 @@ class DashboardView extends GetView<DashboardController> {
               style: const TextStyle(color: Colors.grey, fontSize: 13),
             ),
             const SizedBox(height: 24),
-
-            // Progress Card (Dummy placeholder for illustration)
             _buildProgressCard(),
             const SizedBox(height: 24),
-
-            // Attendance Card
             _buildAttendanceCard(),
             const SizedBox(height: 24),
-
-            // Selection Dropdowns
             const Text(
               'SELECT DISTRIBUTOR',
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
@@ -80,7 +73,7 @@ class DashboardView extends GetView<DashboardController> {
             ),
             const SizedBox(height: 8),
             _buildRouteDropdown(),
-            const SizedBox(height: 80), // Space for bottom bar
+            const SizedBox(height: 80),
           ],
         ),
       ),

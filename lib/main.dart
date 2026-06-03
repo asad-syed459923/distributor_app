@@ -11,18 +11,22 @@ import 'presentation/views/profile_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HiveProvider.init();
-  
-  runApp(const MyApp());
+
+  final hiveProvider = HiveProvider();
+  if (hiveProvider.isLoggedIn() && hiveProvider.getToken() == null) {
+    await hiveProvider.logout();
+  }
+
+  runApp(MyApp(isLoggedIn: hiveProvider.isLoggedIn()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
-    final hiveProvider = HiveProvider();
-    final isLoggedIn = hiveProvider.isLoggedIn();
-
     return GetMaterialApp(
       title: 'Distributor App',
       debugShowCheckedModeBanner: false,

@@ -16,35 +16,39 @@ class DashboardController extends GetxController {
   var user = Rxn<UserModel>();
   var distributors = <DistributorModel>[].obs;
   var routes = <RouteModel>[].obs;
-  
+
   var selectedDistributor = Rxn<DistributorModel>();
   var selectedRoute = Rxn<RouteModel>();
-  
+
   var isLoading = false.obs;
   var isLocationLoading = false.obs;
-  
+
   var isCheckedIn = false.obs;
   var lastAttendanceTime = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    user.value = _authRepository.getCachedUser();
+    user.value = _authRepository.getUser();
     fetchDistributors();
-    checkInitialAttendanceStatus();
+    _loadCheckInState();
   }
 
-  void checkInitialAttendanceStatus() {
-    final history = _attendanceRepository.getAttendanceHistory();
-    if (history.isNotEmpty) {
-      final last = history.first;
-      lastAttendanceTime.value = last.dateTime.split(' ')[1]; // Extract HH:MM:SS
-      if (last.type == 'in') {
-        isCheckedIn.value = true;
-      } else {
-        isCheckedIn.value = false;
-      }
+  void _loadCheckInState() {
+    isCheckedIn.value = _attendanceRepository.isCheckedIn();
+
+    final time = _attendanceRepository.checkInTime();
+    if (time != null && time.isNotEmpty) {
+      lastAttendanceTime.value = time.contains(' ') ? time.split(' ')[1] : time;
+      return;
     }
+
+    final history = _attendanceRepository.getAttendanceHistory();
+    if (history.isEmpty) return;
+
+    final last = history.first;
+    lastAttendanceTime.value = last.dateTime.split(' ')[1];
+    isCheckedIn.value = last.type == 'in';
   }
 
   Future<void> fetchDistributors() async {
@@ -52,7 +56,7 @@ class DashboardController extends GetxController {
     try {
       distributors.value = await _attendanceRepository.getDistributors();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch distributors', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
@@ -64,15 +68,13 @@ class DashboardController extends GetxController {
     try {
       routes.value = await _attendanceRepository.getRoutes(distributorId);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch routes', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
 
   void onDistributorChanged(DistributorModel? distributor) {
     selectedDistributor.value = distributor;
-    if (distributor != null) {
-      fetchRoutes(distributor.id);
-    }
+    if (distributor != null) fetchRoutes(distributor.id);
   }
 
   void onRouteChanged(RouteModel? route) {
@@ -81,7 +83,7 @@ class DashboardController extends GetxController {
 
   Future<void> handleAttendance() async {
     if (selectedDistributor.value == null || selectedRoute.value == null) {
-      Get.snackbar('Warning', 'Please select a distributor and a route', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Warning', 'Select a distributor and route first', snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -89,8 +91,8 @@ class DashboardController extends GetxController {
     try {
       final position = await _locationService.getCurrentLocation();
       final now = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-      
-      final attendance = AttendanceModel(
+
+      await _attendanceRepository.saveAttendance(AttendanceModel(
         dateTime: now,
         userId: user.value?.id ?? 0,
         latitude: position.latitude,
@@ -98,15 +100,13 @@ class DashboardController extends GetxController {
         distributorId: selectedDistributor.value!.id,
         routeId: selectedRoute.value!.id,
         type: isCheckedIn.value ? 'out' : 'in',
-        isSynced: false,
-      );
+      ));
 
-      await _attendanceRepository.saveAttendanceLocally(attendance);
-      
       isCheckedIn.value = !isCheckedIn.value;
       lastAttendanceTime.value = DateFormat('hh:mm a').format(DateTime.now());
-      
-      Get.snackbar('Success', 'Check-${isCheckedIn.value ? 'in' : 'out'} recorded locally', snackPosition: SnackPosition.BOTTOM);
+
+      final label = isCheckedIn.value ? 'Checked in' : 'Checked out';
+      Get.snackbar('Done', label, snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {

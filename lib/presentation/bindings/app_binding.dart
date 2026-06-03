@@ -8,8 +8,8 @@ import '../../core/utils/location_service.dart';
 class AppBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(ApiProvider(), permanent: true);
     Get.put(HiveProvider(), permanent: true);
+    Get.put(ApiProvider(Get.find<HiveProvider>()), permanent: true);
     Get.put(LocationService(), permanent: true);
     
     Get.put(AuthRepository(Get.find<ApiProvider>(), Get.find<HiveProvider>()), permanent: true);

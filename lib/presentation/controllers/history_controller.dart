@@ -18,14 +18,14 @@ class HistoryController extends GetxController {
     attendanceHistory.value = _attendanceRepository.getAttendanceHistory();
   }
 
-  Future<void> syncAttendance(int index) async {
+  Future<void> syncAttendance(AttendanceModel record) async {
+    if (record.key == null) return;
+
     isSyncing.value = true;
     try {
-      // Simple approach: sync by finding the object
-      await _attendanceRepository.syncAttendance(index); // This index should be correct if it matches the box index
-      
+      await _attendanceRepository.syncAttendance(record.key!);
       fetchHistory();
-      Get.snackbar('Success', 'Attendance synced successfully', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Done', 'Synced', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {

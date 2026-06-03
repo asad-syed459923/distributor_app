@@ -36,16 +36,18 @@ class UserModel extends HiveObject {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final tso = json['tso'] as Map<String, dynamic>?;
+
     return UserModel(
       id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      name: json['name'] ?? json['username'] ?? '',
       email: json['email'] ?? '',
-      phone: json['phone'],
-      designation: json['designation'],
-      department: json['department'],
-      joiningDate: json['joining_date'],
-      profileImage: json['profile_image'],
-      employeeId: json['employee_id'],
+      phone: tso?['cell_phone'] ?? tso?['phone'],
+      designation: tso?['designation']?['name'],
+      department: tso?['department']?['name'],
+      joiningDate: tso?['date_of_join'],
+      profileImage: json['image'] ?? tso?['image_path'],
+      employeeId: tso?['emp_id'],
     );
   }
 

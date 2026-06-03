@@ -19,7 +19,6 @@ class LoginView extends GetView<LoginController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon Container
               Container(
                 width: 80,
                 height: 80,
@@ -48,7 +47,6 @@ class LoginView extends GetView<LoginController> {
                 ),
               ),
               const SizedBox(height: 40),
-              // Login Card
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(

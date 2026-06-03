@@ -25,13 +25,14 @@ class AttendanceModelAdapter extends TypeAdapter<AttendanceModel> {
       routeId: fields[5] as int,
       type: fields[6] as String,
       isSynced: fields[7] as bool,
+      serverId: fields[8] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AttendanceModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.dateTime)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class AttendanceModelAdapter extends TypeAdapter<AttendanceModel> {
       ..writeByte(6)
       ..write(obj.type)
       ..writeByte(7)
-      ..write(obj.isSynced);
+      ..write(obj.isSynced)
+      ..writeByte(8)
+      ..write(obj.serverId);
   }
 
   @override

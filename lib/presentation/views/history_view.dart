@@ -24,7 +24,7 @@ class HistoryView extends GetView<HistoryController> {
       ),
       body: Obx(() {
         if (controller.attendanceHistory.isEmpty) {
-          return const Center(child: Text('No attendance records found.'));
+          return const Center(child: Text('No records yet'));
         }
         return ListView.separated(
           padding: const EdgeInsets.all(16),
@@ -97,7 +97,7 @@ class HistoryView extends GetView<HistoryController> {
                       ),
                       if (!record.isSynced)
                         TextButton(
-                          onPressed: controller.isSyncing.value ? null : () => controller.syncAttendance(index),
+                          onPressed: controller.isSyncing.value ? null : () => controller.syncAttendance(record),
                           child: const Text('POST', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF00BFA5))),
                         ),
                     ],

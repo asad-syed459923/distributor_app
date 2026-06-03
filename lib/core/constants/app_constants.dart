@@ -12,4 +12,8 @@ class AppConstants {
   
   static const String keyUser = 'user';
   static const String keyIsLoggedIn = 'isLoggedIn';
+  static const String keyToken = 'token';
+  static const String keyActiveAttendanceId = 'activeAttendanceId';
+  static const String keyIsCheckedIn = 'isCheckedIn';
+  static const String keyCheckInTime = 'checkInTime';
 }

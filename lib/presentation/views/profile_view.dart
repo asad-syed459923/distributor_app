@@ -9,7 +9,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authRepo = Get.find<AuthRepository>();
-    final user = authRepo.getCachedUser();
+    final user = authRepo.getUser();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
@@ -26,25 +26,20 @@ class ProfileView extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Profile Header Card
             _buildProfileHeader(user),
             const SizedBox(height: 24),
-            
-            // Sections
             _buildSectionHeader('APP & COMPANY'),
             _buildInfoTile(Icons.business, 'Company Name', 'Laziza Foods'),
             _buildInfoTile(Icons.vibration, 'App Version', '1.0.13'),
-            
             const SizedBox(height: 24),
             _buildSectionHeader('WORK INFORMATION'),
-            _buildInfoTile(Icons.badge_outlined, 'Employee ID', user?.employeeId ?? 'N/A'),
-            _buildInfoTile(Icons.category_outlined, 'Department Name', user?.department ?? 'Sales'),
-            _buildInfoTile(Icons.calendar_today_outlined, 'Date Of Joining', user?.joiningDate ?? '2025-05-13'),
-            
+            _buildInfoTile(Icons.badge_outlined, 'Employee ID', user?.employeeId ?? '-'),
+            _buildInfoTile(Icons.category_outlined, 'Department', user?.department ?? '-'),
+            _buildInfoTile(Icons.calendar_today_outlined, 'Date Of Joining', user?.joiningDate ?? '-'),
             const SizedBox(height: 24),
-            _buildSectionHeader('CONTACT INFORMATION'),
-            _buildInfoTile(Icons.phone_outlined, 'Phone Number', user?.phone ?? '03002233445'),
-            _buildInfoTile(Icons.email_outlined, 'Email Address', user?.email ?? 'test@gmail.com'),
+            _buildSectionHeader('CONTACT'),
+            _buildInfoTile(Icons.phone_outlined, 'Phone', user?.phone ?? '-'),
+            _buildInfoTile(Icons.email_outlined, 'Email', user?.email ?? '-'),
             
             const SizedBox(height: 40),
             ElevatedButton(
@@ -95,7 +90,7 @@ class ProfileView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'User Name',
+                  user?.name ?? 'User',
                   style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(

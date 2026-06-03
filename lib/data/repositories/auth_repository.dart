@@ -10,16 +10,37 @@ class AuthRepository {
 
   Future<UserModel> login(String email, String password) async {
     final response = await _apiProvider.login(email, password);
-    if (response.statusCode == 200) {
-      final user = UserModel.fromJson(response.data['user']);
-      await _hiveProvider.saveUser(user);
-      return user;
-    } else {
-      throw response.data['message'] ?? 'Login failed';
+    final body = response.data as Map<String, dynamic>;
+
+    if (response.statusCode != 200 || body['success'] != true) {
+      throw body['message'] ?? 'Login failed';
     }
+
+    final data = body['data'] as Map<String, dynamic>;
+    final user = UserModel.fromJson(data);
+
+    await _hiveProvider.saveUser(user);
+
+    final token = data['token'];
+    if (token != null) {
+      await _hiveProvider.saveToken(token.toString());
+    }
+
+    final attendence = data['attendence'] as Map<String, dynamic>?;
+    if (attendence != null && attendence['out'] == null) {
+      await _hiveProvider.saveCheckInState(
+        checkedIn: true,
+        attendanceId: attendence['id'] as int?,
+        time: attendence['in']?.toString(),
+      );
+    } else {
+      await _hiveProvider.clearCheckInState();
+    }
+
+    return user;
   }
 
-  UserModel? getCachedUser() => _hiveProvider.getUser();
+  UserModel? getUser() => _hiveProvider.getUser();
   bool isLoggedIn() => _hiveProvider.isLoggedIn();
   Future<void> logout() => _hiveProvider.logout();
 }

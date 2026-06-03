@@ -27,17 +27,49 @@ class HiveProvider {
     await authBox.put(AppConstants.keyIsLoggedIn, true);
   }
 
-  UserModel? getUser() {
-    return profileBox.get(AppConstants.keyUser);
+  Future<void> saveToken(String token) async {
+    await authBox.put(AppConstants.keyToken, token);
   }
 
-  bool isLoggedIn() {
-    return authBox.get(AppConstants.keyIsLoggedIn, defaultValue: false);
-  }
+  String? getToken() => authBox.get(AppConstants.keyToken);
+
+  UserModel? getUser() => profileBox.get(AppConstants.keyUser);
+
+  bool isLoggedIn() => authBox.get(AppConstants.keyIsLoggedIn, defaultValue: false);
 
   Future<void> logout() async {
     await authBox.put(AppConstants.keyIsLoggedIn, false);
+    await authBox.delete(AppConstants.keyToken);
+    await authBox.delete(AppConstants.keyActiveAttendanceId);
+    await authBox.delete(AppConstants.keyIsCheckedIn);
+    await authBox.delete(AppConstants.keyCheckInTime);
     await profileBox.clear();
+  }
+
+  Future<void> saveCheckInState({
+    required bool checkedIn,
+    int? attendanceId,
+    String? time,
+  }) async {
+    await authBox.put(AppConstants.keyIsCheckedIn, checkedIn);
+    if (attendanceId != null) {
+      await authBox.put(AppConstants.keyActiveAttendanceId, attendanceId);
+    }
+    if (time != null) {
+      await authBox.put(AppConstants.keyCheckInTime, time);
+    }
+  }
+
+  bool isCheckedIn() => authBox.get(AppConstants.keyIsCheckedIn, defaultValue: false);
+
+  int? activeAttendanceId() => authBox.get(AppConstants.keyActiveAttendanceId);
+
+  String? checkInTime() => authBox.get(AppConstants.keyCheckInTime);
+
+  Future<void> clearCheckInState() async {
+    await authBox.delete(AppConstants.keyActiveAttendanceId);
+    await authBox.put(AppConstants.keyIsCheckedIn, false);
+    await authBox.delete(AppConstants.keyCheckInTime);
   }
 
   Future<void> addAttendance(AttendanceModel attendance) async {
@@ -48,20 +80,23 @@ class HiveProvider {
     return attendanceBox.values.toList().reversed.toList();
   }
 
-  Future<void> markAsSynced(int index) async {
-    final attendance = attendanceBox.getAt(index);
-    if (attendance != null) {
-      final updated = AttendanceModel(
-        dateTime: attendance.dateTime,
-        userId: attendance.userId,
-        latitude: attendance.latitude,
-        longitude: attendance.longitude,
-        distributorId: attendance.distributorId,
-        routeId: attendance.routeId,
-        type: attendance.type,
+  Future<void> markAsSynced(dynamic key, {int? serverId}) async {
+    final record = attendanceBox.get(key);
+    if (record == null) return;
+
+    await attendanceBox.put(
+      key,
+      AttendanceModel(
+        dateTime: record.dateTime,
+        userId: record.userId,
+        latitude: record.latitude,
+        longitude: record.longitude,
+        distributorId: record.distributorId,
+        routeId: record.routeId,
+        type: record.type,
         isSynced: true,
-      );
-      await attendanceBox.putAt(index, updated);
-    }
+        serverId: serverId ?? record.serverId,
+      ),
+    );
   }
 }

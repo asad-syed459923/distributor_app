@@ -17,9 +17,11 @@ class AttendanceModel extends HiveObject {
   @HiveField(5)
   final int routeId;
   @HiveField(6)
-  final String type; // 'in' or 'out'
+  final String type;
   @HiveField(7)
   final bool isSynced;
+  @HiveField(8)
+  final int? serverId;
 
   AttendanceModel({
     required this.dateTime,
@@ -30,17 +32,26 @@ class AttendanceModel extends HiveObject {
     required this.routeId,
     required this.type,
     this.isSynced = false,
+    this.serverId,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'in': type == 'in' ? dateTime : null,
-      'out': type == 'out' ? dateTime : null,
+  Map<String, dynamic> toApiPayload({int? checkoutId}) {
+    final map = <String, dynamic>{
       'user_id': userId,
       'latitude': latitude,
       'longitude': longitude,
       'distributor_id': distributorId,
       'route_id': routeId,
-    }..removeWhere((key, value) => value == null);
+    };
+
+    if (type == 'in') {
+      map['in'] = dateTime;
+    } else {
+      map['out'] = dateTime;
+      final id = serverId ?? checkoutId;
+      if (id != null) map['id'] = id;
+    }
+
+    return map;
   }
 }

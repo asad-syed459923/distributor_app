@@ -14,7 +14,7 @@ class DistributorModel {
   factory DistributorModel.fromJson(Map<String, dynamic> json) {
     return DistributorModel(
       id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      name: json['distributor_name'] ?? json['name'] ?? '',
     );
   }
 
